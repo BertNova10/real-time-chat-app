@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* ✅ Stylish Background Graphic */
+    body {
+      background: url('https://source.unsplash.com/1600x900/?technology,abstract') no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ✅ Semi-transparent Chat Box */
+    .chat-container {
+      width: 90%;
+      max-width: 600px;
+      background: rgba(30, 30, 30, 0.8); /* Transparent effect */
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ✅ Modern Chat Header */
+    .chat-header {
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    /* ✅ Chat Messages */
+    #messages {
+      flex: 1;
+      height: 300px;
+      padding: 15px;
+      background: #252525;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: auto;  /* ✅ Enables horizontal scrolling */
+      white-space: nowrap;  /* ✅ Prevents text wrapping */
+    }
+
+    .message {
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      max-width: fit-content; /* ✅ Prevents auto-wrapping */
+      display: inline-block;
+      overflow-x: auto; /* ✅ Allows horizontal scrolling */
+    }
+
+    .message.user {
+      background: #6200ea;
+      align-self: flex-end;
+      text-align: right;
+    }
+
+    .message.other {
+      background: #333;
+      align-self: flex-start;
+    }
+
+    .message small {
+      display: block;
+      font-size: 12px;
+      margin-top: 5px;
+      opacity: 0.6;
+    }
+
+    /* ✅ Modern Input & Button Styling */
+    .chat-footer {
+      display: flex;
+      padding: 10px;
+      background: rgba(30, 30, 30, 0.9);
+      border-top: 1px solid #444;
+    }
+
+    .chat-footer input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      background: #333;
+      color: #fff;
+    }
+
+    .chat-footer button {
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: bold;
+    }
+
+    .chat-footer button:hover {
+      background: linear-gradient(135deg, #2575fc, #6a11cb);
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">Live Chat</div>
+    <div id="messages"></div>
+    <div class="chat-footer">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="text" id="message-input" placeholder="Type your message..." required>
+      <button type="submit" id="send-btn">➤</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('message-input');
+    const usernameInput = document.getElementById('username');
+    const sendButton = document.getElementById('send-btn');
+
+    sendButton.addEventListener('click', () => {
+      const username = usernameInput.value.trim();
+      const message = messageInput.value.trim();
+
+      if (!username || !message) return;
+
+      socket.emit('send message', { username, content: message });
+
+      messageInput.value = '';
+    });
+
+    socket.on('new message', (message) => {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', message.username === usernameInput.value ? 'user' : 'other');
+      messageElement.innerHTML = `
+        <strong>${message.username}</strong>: ${message.content}
+        <small>${new Date(message.createdAt).toLocaleTimeString()}</small>
+      `;
+      messagesDiv.appendChild(messageElement);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      messagesDiv.scrollLeft = messagesDiv.scrollWidth; // ✅ Moves horizontal scroll to the latest message
+    });
+
+    socket.on('load messages', (messages) => {
+      messagesDiv.innerHTML = '';
+      messages.forEach(message => {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', message.username === usernameInput.value ? 'user' : 'other');
+        messageElement.innerHTML = `
+          <strong>${message.username}</strong>: ${message.content}
+          <small>${new Date(message.createdAt).toLocaleTimeString()}</small>
+        `;
+        messagesDiv.appendChild(messageElement);
+      });
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      messagesDiv.scrollLeft = messagesDiv.scrollWidth; // ✅ Moves horizontal scroll to the latest message
+    });
+  </script>
+</body>
+</html>
