@@ -3,6 +3,7 @@ const http = require("http");
 const {Server} = require("socket.io");
 const mongoose = require('mongoose');
 const Message = require('./models/Message');  // Adjust path if needed
+const path = require("path");
 
 
 const app = express();
@@ -13,6 +14,7 @@ const io = new Server(server);
 mongoose.connect("mongodb+srv://akashsabavath09:acnayak9@cluster0.cra8c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0").then(() => console.log('connected to Data base')).catch(err => console.error(err));
 
 //Middleware
+app.set("views", path.join(__dirname, "views"));
 app.use(express.static('public'));
 app.set('view engine','ejs');
 
