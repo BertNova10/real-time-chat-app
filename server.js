@@ -3,7 +3,7 @@ const http = require("http");
 const {Server} = require("socket.io");
 const mongoose = require('mongoose');
 const Message = require('./models/Message');  // Adjust path if needed
-const path = require("path");
+const path = require('path');
 
 
 const app = express();
@@ -13,15 +13,12 @@ const io = new Server(server);
 //connect to MongoDB
 mongoose.connect("mongodb+srv://akashsabavath09:acnayak9@cluster0.cra8c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0").then(() => console.log('connected to Data base')).catch(err => console.error(err));
 
-// Set the view engine to EJS
-app.set('view engine', 'ejs');
+app.set('view engine', 'ejs'); // Replace "ejs" with your engine (pug/hbs)
+app.set('views', path.join(__dirname, 'views')); // Absolute path to views
 
-// Set the views directory
-app.set('views', path.join(__dirname, 'views'));
-
-// Route to render the index view
+// Example route
 app.get('/', (req, res) => {
-  res.render('index'); // Looks for views/index.ejs
+  res.render('index'); // Renders views/index.ejs
 });
 
 //SockerIO logic
