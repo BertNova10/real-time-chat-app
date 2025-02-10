@@ -14,13 +14,17 @@ const io = new Server(server);
 mongoose.connect("mongodb+srv://akashsabavath09:acnayak9@cluster0.cra8c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0").then(() => console.log('connected to Data base')).catch(err => console.error(err));
 
 //Middleware
-app.set("views", path.join(__dirname, "views"));
-app.use(express.static('public'));
-app.set('view engine','ejs');
+app.set("view engine", "ejs");
 
-//routes
-app.get('/',(req,res)=>{
-    res.render('index');
+// Explicitly set the views directory (corrects missing views error)
+app.set("views", path.join(__dirname, "views"));
+
+// Serve static files from the "public" folder
+app.use(express.static(path.join(__dirname, "public")));
+
+// Route
+app.get("/", (req, res) => {
+    res.render("index"); // Make sure views/index.ejs exists
 });
 
 //SockerIO logic
